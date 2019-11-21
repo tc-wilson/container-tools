@@ -58,6 +58,7 @@ fi
 # make sure the dir exists
 [ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
 
+yum install -y rt-tests tmux
 for cmd in tmux cyclictest; do
     command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed.  Aborting"; exit 1; }
 done
