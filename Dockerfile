@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:7
 ENV trace=false
 USER root
 COPY run.sh /root

@@ -24,6 +24,9 @@ function convert_number_range() {
         echo "$cpus_list"
 }
 
+echo "############# dumping env ###########"
+env
+echo "#####################################"
 
 if [[ -z "${DURATION}" ]]; then
 	DURATION="24h"
@@ -57,6 +60,22 @@ fi
 
 # make sure the dir exists
 [ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
+
+release=$(cat /etc/os-release | sed -n -r 's/VERSION_ID="(.).*/\1/p')
+[ "$release" = "7" ] && cat <<EOF > /etc/yum.repos.d/rt.repo
+[RT]
+name=CentOS-7-rt
+baseurl=http://mirror.centos.org/centos/\$releasever/rt/\$basearch/
+enabled=1
+gpgcheck=0
+EOF
+[ "$release" = "8" ] && cat <<EOF > /etc/yum.repos.d/rt.repo
+[RT]
+name=Red Hat Enterprise Linux - 8.0 - Server RT 
+baseurl=http://download-node-02.eng.bos.redhat.com/released/rhel-8/RHEL-8/8.0.0/RT/x86_64/os/
+enabled=1
+gpgcheck=0
+EOF
 
 yum install -y rt-tests tmux
 for cmd in tmux cyclictest; do
@@ -93,7 +112,13 @@ while (( $cindex < ${#cpus[@]} )); do
 done
 
 touch ${RESULT_DIR}/cyclictest_running
-cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m -n > ${RESULT_DIR}/cyclictest_${DURATION}.out
+
+extra_opt=""
+if [[ "$release" = "7" ]]; then
+    extra_opt="${extra_opt} -n"
+fi
+
+cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt} > ${RESULT_DIR}/cyclictest_${DURATION}.out
 # kill stress before exit 
 tmux kill-session -t stress 2>/dev/null
 rm -rf ${RESULT_DIR}/cyclictest_running
