@@ -13,7 +13,9 @@ spec:
         cpu: "4"
     env:
     - name: tool
-      value: cyclictest
+      value: "cyclictest"
+    - name: trace
+      value: "false"
     - name: DURATION
       value: "24h"
     securityContext:
