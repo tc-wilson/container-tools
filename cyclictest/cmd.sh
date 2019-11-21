@@ -51,6 +51,9 @@ else
 	rt_priority=99
 fi
 
+if [[ -z "${trace}" ]]; then
+        trace="false"
+fi
 
 # make sure the dir exists
 [ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
