@@ -28,6 +28,7 @@ echo "############# dumping env ###########"
 env
 echo "#####################################"
 
+echo "**** uid: $UID ****"
 if [[ -z "${DURATION}" ]]; then
 	DURATION="24h"
 fi
