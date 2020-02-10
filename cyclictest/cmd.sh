@@ -89,6 +89,14 @@ cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
 declare -a cpus
 cpus=(${cpulist})
 
+for cpu in ${cpulist}; do
+    for file in $(find /proc/sys/kernel/sched_domain/cpu$cpu -name flags -print); do
+        flags_cur=$(cat $file)
+        flags_cur=$((flags_cur & 0xfffe))
+        echo $flags_cur > $file
+    done
+done
+
 trap sigfunc TERM INT SIGUSR1
 
 # stress run in each tmux window per cpu
