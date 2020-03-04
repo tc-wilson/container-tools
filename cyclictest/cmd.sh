@@ -80,7 +80,7 @@ EOF
 
 yum install -y rt-tests tmux
 for cmd in tmux cyclictest; do
-    command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed.  Aborting"; exit 1; }
+    command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed. Aborting"; exit 1; }
 done
 
 cpulist=`cat /proc/self/status | grep Cpus_allowed_list: | cut -f 2`
@@ -101,6 +101,7 @@ trap sigfunc TERM INT SIGUSR1
 
 # stress run in each tmux window per cpu
 if [[ "$stress" == "stress-ng" ]]; then
+    yum install -y stress-ng 2>&1 || { echo >&2 "stress-ng required but install failed. Aborting"; exit 1; }
     tmux new-session -s stress -d
     for w in $(seq 1 ${#cpus[@]}); do
         tmux new-window -t stress -n $w "taskset -c ${cpus[$(($w-1))]} stress-ng --cpu 1 --cpu-load 100 --cpu-method loop"
