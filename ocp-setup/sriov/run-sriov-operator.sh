@@ -15,9 +15,8 @@ SRIOV_OPERATOR_REPO=https://github.com/openshift/sriov-network-operator.git
 SRIOV_OPERATOR_NAMESPACE=openshift-sriov-network-operator
 
 WORKER_NODE=perf150
-export WORKER_NAME_PREFIX=${WORKER_NODE:-"worker"}
 
-NUM_OF_WORKER=$(oc get nodes | grep worker | wc -l)
+NUM_OF_WORKER=$(oc get nodes | grep ${WORKER_NODE} | wc -l)
 NUM_OF_MASTER=$(oc get nodes | grep master | wc -l)
 
 # override SR-IOV images
@@ -48,18 +47,18 @@ for i in {1..10}; do
 	daemonset=$(oc get ds sriov-network-config-daemon \
 			-n $SRIOV_OPERATOR_NAMESPACE | tail -n 1 | awk '{print $4}')
 
-	if [ $injector -eq $NUM_OF_MASTER ] && [ $webhook -eq $NUM_OF_MASTER ] \
-		&& [ $daemonset -eq $NUM_OF_WORKER ]; then
+	if [ "${injector:-0}" -eq "$NUM_OF_MASTER" ] && [ "${webhook:-0}" -eq "$NUM_OF_MASTER" ] \
+		&& [ "${daemonset:-0}" -ge "$NUM_OF_WORKER" ]; then
 		break
 	fi
 
-	if [ $i -eq 10 ]; then
+	if [ "$i" -eq 10 ]; then
 		echo "oc get ds network-resources-injector/operator-webhook/sriov-network-config-daemon -n $SRIOV_OPERATOR_NAMESPACE failed"
 		exit 1
 	fi
 done
 
-for worker in $(oc get nodes | grep worker | awk '{print $1}'); do
+for worker in $(oc get nodes | grep ${WORKER_NODE} | awk '{print $1}'); do
 	oc label node $worker \
 		--overwrite=true feature.node.kubernetes.io/network-sriov.capable=true
 done
@@ -67,8 +66,8 @@ done
 # Wait for operator webhook to become ready
 sleep 30
 
-oc create -f policy-mlx-west.yaml || {echo "policy-mlx-west.yaml failed"; exit 1 }
-oc create -f policy-mlx-east.yaml || {echo "policy-mlx-east.yaml failed"; exit 1 }
+oc create -f policy-mlx-west.yaml
+oc create -f policy-mlx-east.yaml
 RESOURCE_NAME=$(sed -n -r 's/.*resourceName:\s*(\w+).*/\1/p' sn-mlx-west.yaml)
 
 for i in {1..60}; do
@@ -78,7 +77,7 @@ for i in {1..60}; do
 	dp=$(oc get ds sriov-device-plugin \
 			-n $SRIOV_OPERATOR_NAMESPACE | tail -n 1 | awk '{print $4}')
 
-	if [ $cni -eq $NUM_OF_WORKER ] && [ $dp -eq $NUM_OF_WORKER ]; then
+	if [ "$cni" -ge "$NUM_OF_WORKER" ] && [ "$dp" -ge "$NUM_OF_WORKER" ]; then
 		break
 	fi
 
@@ -93,7 +92,7 @@ sleep 30
 for i in {1..30}; do
 	sleep 20
 	count=0
-	for worker in $(oc get nodes | grep worker | awk '{print $1}'); do
+	for worker in $(oc get nodes | grep ${WORKER_NODE} | awk '{print $1}'); do
 		resource=$(oc get node $worker \
 			-o jsonpath="{.status.allocatable.openshift\.io/${RESOURCE_NAME}}")
 
@@ -111,3 +110,7 @@ for i in {1..30}; do
 		exit 1
 	fi
 done
+
+oc create -f sn-mlx-east.yaml
+oc create -f sn-mlx-west.yaml
+
