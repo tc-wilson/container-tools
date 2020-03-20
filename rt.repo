@@ -1,0 +1,5 @@
+[RT]
+name=Red Hat Enterprise Linux - 8.0 - Server RT 
+baseurl=http://download-node-02.eng.bos.redhat.com/released/rhel-8/RHEL-8/8.0.0/RT/x86_64/os/
+enabled=1
+gpgcheck=0

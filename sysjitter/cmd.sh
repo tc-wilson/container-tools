@@ -1,7 +1,12 @@
 #!/bin/bash
 
+source ../common-libs/functions.sh
+
 function sigfunc() {
 	rm -rf {RESULT_DIR}/sysjitter_running
+	if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+		enable_balance
+	fi
 	exit 0
 }
 
@@ -45,6 +50,10 @@ cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
 declare -a cpus
 cpus=(${cpulist})
 
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+	disable_balance
+fi
+
 trap sigfunc TERM INT SIGUSR1
 
 if ! command -v sysjitter >/dev/null 2>&1; then
@@ -67,12 +76,16 @@ while (( $cindex < ${#cpus[@]} )); do
         ccount=$(($ccount + 1))
 done
 
-EXTRA_OPTS=""
+prefix_cmd=""
 if [ "${USE_TASKSET:-n}" == "y" ]; then
-	EXTRA_OPTS="taskset --cpu-list ${cyccore}"
+	prefix_cmd="taskset --cpu-list ${cyccore}"
 fi
  
 touch ${RESULT_DIR}/sysjitter_running
 
-${EXTRA_OPTS} sysjitter --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
+${prefix_cmd} sysjitter --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
 rm -rf ${RESULT_DIR}/sysjitter_running
+
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+	enable_balance
+fi
