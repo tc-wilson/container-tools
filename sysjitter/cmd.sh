@@ -48,6 +48,7 @@ cpus=(${cpulist})
 trap sigfunc TERM INT SIGUSR1
 
 if ! command -v sysjitter >/dev/null 2>&1; then
+	yum install -y make gcc
 	[ -d /tmp/sysjitter ] && /usr/bin/rm -rf /tmp/sysjitter
 	mkdir -p /tmp/sysjitter
 	curl -L https://www.openonload.org/download/sysjitter/sysjitter-1.4.tgz | tar -C /tmp/sysjitter -xzf - 
