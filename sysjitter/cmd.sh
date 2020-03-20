@@ -67,7 +67,12 @@ while (( $cindex < ${#cpus[@]} )); do
         ccount=$(($ccount + 1))
 done
 
+EXTRA_OPTS=""
+if [ "${USE_CPUSET:-n}" == "y" ]; then
+	EXTRA_OPTS="${EXTRA_OPTS} --cores ${cyccore}"
+fi
+ 
 touch ${RESULT_DIR}/sysjitter_running
 
-sysjitter --runtime ${RUNTIME_SECONDS} --cores ${cyccore} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
+sysjitter --runtime ${RUNTIME_SECONDS} ${EXTRA_OPTS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
 rm -rf ${RESULT_DIR}/sysjitter_running
