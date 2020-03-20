@@ -5,14 +5,45 @@ metadata:
   annotations:
     k8s.v1.cni.cncf.io/networks: sriov-mlx-west,sriov-mlx-east
 spec:
+  restartPolicy: Never
   containers:
-  - name: appcntr1
-    image: centos
-    imagePullPolicy: IfNotPresent
+  - name: testpmd 
+    image: docker.io/cscojianzhan/testpmd
+    #imagePullPolicy: IfNotPresent
+    imagePullPolicy: Always
+    env:
+    - name: manual
+      value: "y"
+    - name: ring_size
+      value: "2048"
     securityContext:
       capabilities:
-        add: ["IPC_LOCK"]
-#      privileged: true
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "while true; do sleep 300000; done;" ]
+      privileged: true
+    volumeMounts:
+    - mountPath: /dev/hugepages
+      name: hugepage
+    - mountPath: /sys
+      name: sys
+    - mountPath: /dev
+      name: dev
+    resources:
+      limits:
+        cpu: 4
+        hugepages-1Gi: 2Gi
+        memory: 2Gi
+      requests:
+        cpu: 4
+        hugepages-1Gi: 2Gi
+        memory: 2Gi
+  volumes:
+  - name: sys
+    hostPath:
+      path: /sys
+  - name: dev
+    hostPath:
+      path: /dev
+  - name: hugepage
+    emptyDir:
+      medium: HugePages
+
 
