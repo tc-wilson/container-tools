@@ -1,8 +1,13 @@
 #!/bin/bash
 
+source common-libs/functions.sh
+
 function sigfunc() {
         tmux kill-session -t stress 2>/dev/null
 	rm -rf {RESULT_DIR}/cyclictest_running
+	if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+		enable_balance
+	fi
 	exit 0
 }
 
@@ -70,13 +75,9 @@ cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
 declare -a cpus
 cpus=(${cpulist})
 
-for cpu in ${cpulist}; do
-    for file in $(find /proc/sys/kernel/sched_domain/cpu$cpu -name flags -print); do
-        flags_cur=$(cat $file)
-        flags_cur=$((flags_cur & 0xfffe))
-        echo $flags_cur > $file
-    done
-done
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+	disable_balance
+fi
 
 trap sigfunc TERM INT SIGUSR1
 
@@ -113,3 +114,8 @@ cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 
 # kill stress before exit 
 tmux kill-session -t stress 2>/dev/null
 rm -rf ${RESULT_DIR}/cyclictest_running
+
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+	enable_balance
+fi
+
