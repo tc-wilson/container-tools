@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never 
   containers:
   - name: container-perf-tools 
-    image:  docker.io/cscojianzhan/container-perf-tools
+    image: quay.io/jianzzha/perf-tools
     resources:
       limits:
         memory: "200Mi"
@@ -14,10 +14,8 @@ spec:
     env:
     - name: tool
       value: "cyclictest"
-    - name: trace
-      value: "false"
     - name: DURATION
-      value: "24h"
+      value: "2m"
     securityContext:
       capabilities:
         add:

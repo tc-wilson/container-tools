@@ -55,30 +55,11 @@ else
 	rt_priority=99
 fi
 
-if [[ -z "${trace}" ]]; then
-        trace="false"
-fi
-
 # make sure the dir exists
 [ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
 
 release=$(cat /etc/os-release | sed -n -r 's/VERSION_ID="(.).*/\1/p')
-[ "$release" = "7" ] && cat <<EOF > /etc/yum.repos.d/rt.repo
-[RT]
-name=CentOS-7-rt
-baseurl=http://mirror.centos.org/centos/\$releasever/rt/\$basearch/
-enabled=1
-gpgcheck=0
-EOF
-[ "$release" = "8" ] && cat <<EOF > /etc/yum.repos.d/rt.repo
-[RT]
-name=Red Hat Enterprise Linux - 8.0 - Server RT 
-baseurl=http://download-node-02.eng.bos.redhat.com/released/rhel-8/RHEL-8/8.0.0/RT/x86_64/os/
-enabled=1
-gpgcheck=0
-EOF
 
-yum install -y rt-tests tmux
 for cmd in tmux cyclictest; do
     command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed. Aborting"; exit 1; }
 done
