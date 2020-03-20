@@ -27,14 +27,15 @@ fi
 
 
 cpulist=`get_allowed_cpuset`
-cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
 echo "allowed cpu list: ${cpulist}"
+
+# change list seperators from comma to new line and sort it 
+cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort -n | uniq`
 
 declare -a cpus
 cpus=(${cpulist})
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
-	echo "disable cpu balance on cores: ${cpulist}"
 	disable_balance
 fi
 
@@ -67,7 +68,9 @@ fi
  
 touch ${RESULT_DIR}/sysjitter_running
 
-${prefix_cmd} sysjitter --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
+echo "cmd to run: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}"
+${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
+
 rm -rf ${RESULT_DIR}/sysjitter_running
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
