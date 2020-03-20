@@ -10,24 +10,6 @@ function sigfunc() {
 	exit 0
 }
 
-function convert_number_range() {
-        # converts a range of cpus, like "1-3,5" to a list, like "1,2,3,5"
-        local cpu_range=$1
-        local cpus_list=""
-        local cpus=""
-        for cpus in `echo "$cpu_range" | sed -e 's/,/ /g'`; do
-                if echo "$cpus" | grep -q -- "-"; then
-                        cpus=`echo $cpus | sed -e 's/-/ /'`
-                        cpus=`seq $cpus | sed -e 's/ /,/g'`
-                fi
-                for cpu in $cpus; do
-                        cpus_list="$cpus_list,$cpu"
-                done
-        done
-        cpus_list=`echo $cpus_list | sed -e 's/^,//'`
-        echo "$cpus_list"
-}
-
 echo "############# dumping env ###########"
 env
 echo "#####################################"
@@ -44,13 +26,15 @@ fi
 [ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
 
 
-cpulist=`cat /proc/self/status | grep Cpus_allowed_list: | cut -f 2`
+cpulist=`get_allowed_cpuset`
 cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
+echo "allowed cpu list: ${cpulist}"
 
 declare -a cpus
 cpus=(${cpulist})
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+	echo "disable cpu balance on cores: ${cpulist}"
 	disable_balance
 fi
 
