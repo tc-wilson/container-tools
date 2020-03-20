@@ -13,12 +13,23 @@ spec:
     - name: RUNTIME_SECONDS 
       value: "60"
     - name: THRESHOLD_NS
-      value: "10"
+      value: "200"
+    - name: USE_TASKSET
+      value: "y"
+    - name: DISABLE_CPU_BALANCE
+      value: "y"
     securityContext:
       privileged: true
     volumeMounts:
     - mountPath: /tmp
       name: results-volume
+    resources:
+      limits:
+        cpu: 4
+        memory: "400Mi"
+      requests:
+        cpu: 4
+        memory: "400Mi"
   volumes:
   - name: results-volume
     hostPath:

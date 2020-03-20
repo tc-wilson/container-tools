@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../common-libs/functions.sh
+source common-libs/functions.sh
 
 function sigfunc() {
 	rm -rf {RESULT_DIR}/sysjitter_running
