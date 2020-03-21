@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# env vars:
+#	DURATION (default "24h")
+#	DISABLE_CPU_BALANCE (default "n", choice y/n)
+#	stress_tool (default "false", choices false/stress-ng/rteval)
+#	rt_priority (default "99")
+
 source common-libs/functions.sh
 
 function sigfunc() {
