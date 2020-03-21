@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# env vars:
+#	ring_size (default 2048)
+#	manual    (default n, choices y/n)
+
 function sigfunc() {
 	tmux kill-session -t testpmd
 	sleep 1
@@ -49,12 +54,14 @@ if [ -n "${pci_list}" ]; then
 fi
     
 if [[ -z "${pci_west}" || -z "${pci_east}" ]]; then
-	echo "need env vars: pci_west, pci_east"
+	echo "Coudln't get assigned pci slot info from enviroment vars starting with PCIDEVICE"
         exit 1
 fi
 
+vf_driver=$(ls /sys/bus/pci/devices/${pci_west}/driver/module/drivers/| sed -n -r 's/.*:(.+)/\1/p')
 if [[ -z "${vf_driver}" ]]; then
-	vf_driver="i40evf"
+	echo "couldn't get driver info from /sys/bus/pci/devices/${pci_west}/driver/module/drivers/"
+	exit 1	
 fi
 
 if [[ -z "${ring_size}" ]]; then
@@ -92,7 +99,11 @@ testpmd_cmd="testpmd -l ${cpus[0]},${cpus[1]},${cpus[2]} --socket-mem ${mem} -n 
                  -- --nb-cores=2 --nb-ports=2 --portmask=3  --auto-start \
                     --rxq=1 --txq=1 --rxd=${ring_size} --txd=${ring_size} >/tmp/testpmd"
 
-tmux new-session -s testpmd -d "${testpmd_cmd}"
+if [[ "${manual:-n}" == "n" ]]; then
+	echo "${testpmd_cmd}" > /root/manual_cmd
+else
+	tmux new-session -s testpmd -d "${testpmd_cmd}"
+fi
 
 trap sigfunc TERM INT SIGUSR1
 
