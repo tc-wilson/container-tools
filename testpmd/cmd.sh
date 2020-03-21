@@ -4,31 +4,21 @@
 #	ring_size (default 2048)
 #	manual    (default n, choices y/n)
 
+source common-libs/functions.sh
+
 function sigfunc() {
 	tmux kill-session -t testpmd
 	sleep 1
 	bind_driver ${vf_driver}
+        if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+                enable_balance
+        fi
 	exit 0
 }
 
-# convert_number_range is from https://github.com/atheurer/dpdk-rhel-perf-tools/blob/master/virt-pin.sh
-function convert_number_range() {
-	# converts a range of cpus, like "1-3,5" to a list, like "1,2,3,5"
-	local cpu_range=$1
-	local cpus_list=""
-	local cpus=""
-	for cpus in `echo "$cpu_range" | sed -e 's/,/ /g'`; do
-		if echo "$cpus" | grep -q -- "-"; then
-			cpus=`echo $cpus | sed -e 's/-/ /'`
-			cpus=`seq $cpus | sed -e 's/ /,/g'`
-		fi
-		for cpu in $cpus; do
-			cpus_list="$cpus_list,$cpu"
-		done
-	done
-	cpus_list=`echo $cpus_list | sed -e 's/^,//'`
-	echo "$cpus_list"
-}
+echo "############# dumping env ###########"
+env
+echo "#####################################"
 
 function bind_driver() {
 	local driver=$1
@@ -75,8 +65,10 @@ for cmd in testpmd dpdk-devbind; do
 done
 
 # first parse the cpu list that can be used for testpmd
-cpulist=`cat /proc/self/status | grep Cpus_allowed_list: | cut -f 2`
-cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort | uniq`
+cpulist=`get_allowed_cpuset`
+echo "allowed cpu list: ${cpulist}"
+
+cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort -n | uniq`
 
 declare -a cpus
 cpus=(${cpulist})
@@ -88,11 +80,22 @@ fi
 
 mem="1024,1024"
 
+ifname_west=`ls /sys/bus/pci/devices/${pci_west}/net`
+ip link set ${ifname_west} up
+ifname_east=`ls /sys/bus/pci/devices/${pci_east}/net`
+ip link set ${ifname_east} up
+
 # bind driver to vfio-pci unless it is mlnx nic
 if [ "${vf_driver}" != "mlx5_core" ]; then
     bind_driver "vfio-pci"
     sleep 1
 fi
+
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+        disable_balance
+fi
+
+trap sigfunc TERM INT SIGUSR1
 
 testpmd_cmd="testpmd -l ${cpus[0]},${cpus[1]},${cpus[2]} --socket-mem ${mem} -n 4 --proc-type auto \
                  --file-prefix pg -w ${pci_west} -w ${pci_east} \
@@ -105,9 +108,12 @@ else
 	tmux new-session -s testpmd -d "${testpmd_cmd}"
 fi
 
-trap sigfunc TERM INT SIGUSR1
-
 sleep infinity
 tmux kill-session -t testpmd
 sleep 1
 bind_driver ${vf_driver}
+
+if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
+        enable_balance
+fi
+

@@ -53,6 +53,15 @@ fi
 
 release=$(cat /etc/os-release | sed -n -r 's/VERSION_ID="(.).*/\1/p')
 
+rpm -e --nodeps rt-tests
+cat <<EOF >/etc/yum.repos.d/CentOS-rt.repo
+[rt]
+name=CentOS-7-rt
+baseurl=http://mirror.centos.org/centos/7/rt/x86_64/
+gpgcheck=0
+EOF
+yum install -y rt-tests
+
 for cmd in tmux cyclictest; do
     command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed. Aborting"; exit 1; }
 done
@@ -101,7 +110,11 @@ if [[ "$release" = "7" ]]; then
 fi
 
 echo "running cmd: cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt}"
-cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt} > ${RESULT_DIR}/cyclictest_${DURATION}.out
+if [ "${manual:-n}" == "n" ]; then
+    cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt} > ${RESULT_DIR}/cyclictest_${DURATION}.out
+else
+    sleep infinity
+fi
 
 # kill stress before exit 
 tmux kill-session -t stress 2>/dev/null
