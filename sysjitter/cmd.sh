@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# env vars:
+#	RUNTIME_SECONDS (default 10)
+#	THRESHOLD_NS    (default 200)
+#	DISABLE_CPU_BALANCE (default "n", choices y/n)
+#	USE_TASKSET     (default "n", choice y/n)	
+
 source common-libs/functions.sh
 
 function sigfunc() {

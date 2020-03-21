@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# env vars: GIT_URL (default https://github.com/jianzzha/container-tools.git)
+#           tool (choices: sysjitter/testpmd/cyclictest)
+
 function sigfunc() {
 	exit 0
 }
@@ -9,7 +12,10 @@ echo "######################################"
 env
 echo "######################################"
 
-git clone https://github.com/jianzzha/container-tools.git /root/container-tools
+[ -n "${GIT_URL}" ] || GIT_URL="https://github.com/jianzzha/container-tools.git"
+
+echo "git clone ${GIT_URL}"
+git clone ${GIT_URL} /root/container-tools
 cd /root/container-tools
 
 if [ -d /root/container-tools/$tool ]; then
