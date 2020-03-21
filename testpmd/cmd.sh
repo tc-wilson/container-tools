@@ -81,9 +81,9 @@ fi
 mem="1024,1024"
 
 ifname_west=`ls /sys/bus/pci/devices/${pci_west}/net`
-ip link set ${ifname_west} up
+ip link set dev ${ifname_west} up
 ifname_east=`ls /sys/bus/pci/devices/${pci_east}/net`
-ip link set ${ifname_east} up
+ip link set dev ${ifname_east} up
 
 # bind driver to vfio-pci unless it is mlnx nic
 if [ "${vf_driver}" != "mlx5_core" ]; then
