@@ -60,6 +60,20 @@ fi
 
 echo "pci_west ${pci_west} pci_east ${pci_east} vf_driver ${vf_driver} ring_size ${ring_size}"
 
+# if python not exist, try link it to python3
+if ! command -v python >/dev/null 2>&1; then
+	if command -v python3 >/dev/null 2>&1; then
+		mkdir -p /usr/local/bin
+		ln -s `which python3` /usr/local/bin/python
+	elif command -v python2.7 >/dev/null 2>&1; then
+                mkdir -p /usr/local/bin
+		ln -s `which python2.7` /usr/local/bin/python
+        else
+		echo "failed to find python3 or python2.7"
+		exit 1
+	fi
+fi
+
 for cmd in testpmd dpdk-devbind; do
     command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed.  Aborting"; exit 1; }
 done
