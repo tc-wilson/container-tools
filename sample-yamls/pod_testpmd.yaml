@@ -6,6 +6,7 @@ metadata:
     k8s.v1.cni.cncf.io/networks: sriov-mlx-west,sriov-mlx-east
 spec:
   restartPolicy: Never
+  hostNetwork: true
   containers:
   - name: testpmd 
     image: quay.io/jianzzha/perf-tools 
