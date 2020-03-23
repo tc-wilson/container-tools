@@ -4,7 +4,7 @@ COPY run.sh /root
 COPY rt.repo /etc/yum.repos.d/
 RUN yum -y install rt-tests rteval \
     && rm -rf /etc/yum.repos.d/rt.repo \
-    && yum -y --enablerepo=extras install epel-release git which wget tmux \
+    && yum -y --enablerepo=extras install epel-release git which pciutils wget tmux \
       python3 net-tools libtool automake gcc gcc-c++ cmake autoconf \
       unzip python3-six numactl-devel make kernel-devel numactl-libs \
       libibverbs libibverbs-devel rdma-core-devel \
