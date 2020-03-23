@@ -1,7 +1,7 @@
 apiVersion: performance.openshift.io/v1alpha1
 kind: PerformanceProfile
 metadata:
-  name: perf150 
+  name: "${WORKER_NODE}"
 spec:
   cpu:
     isolated: "4-23"
