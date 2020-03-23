@@ -8,6 +8,8 @@ spec:
   - name: container-perf-tools 
     image: quay.io/jianzzha/perf-tools
     env:
+    - name: GIT_URL
+      value: https://github.com/jianzzha/fork-container-tools.git
     - name: tool
       value: "sysjitter"
     - name: RUNTIME_SECONDS 
