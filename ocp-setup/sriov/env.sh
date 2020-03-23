@@ -1,22 +1,4 @@
 #!/bin/bash - 
-#===============================================================================
-#
-#          FILE: env.sh
-# 
-#         USAGE: ./env.sh 
-# 
-#   DESCRIPTION: 
-# 
-#       OPTIONS: ---
-#  REQUIREMENTS: ---
-#          BUGS: ---
-#         NOTES: ---
-#        AUTHOR: Jianzhu Zhang (), jianzzha@redhat.com
-#  ORGANIZATION: NFV Perf
-#       CREATED: 03/17/2020 12:38:49 PM
-#      REVISION:  ---
-#===============================================================================
-
 set -o nounset                              # Treat unset variables as an error
 CNI_IMAGE_DIGEST=$(skopeo inspect docker://quay.io/openshift/origin-sriov-cni:${OCP_VERSION} | jq --raw-output '.Digest')
 export SRIOV_CNI_IMAGE=${SRIOV_CNI_IMAGE:-quay.io/openshift/origin-sriov-cni@${CNI_IMAGE_DIGEST}}
