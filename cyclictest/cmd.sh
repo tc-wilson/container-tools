@@ -53,15 +53,6 @@ fi
 
 release=$(cat /etc/os-release | sed -n -r 's/VERSION_ID="(.).*/\1/p')
 
-rpm -e --nodeps rt-tests
-cat <<EOF >/etc/yum.repos.d/CentOS-rt.repo
-[rt]
-name=CentOS-7-rt
-baseurl=http://mirror.centos.org/centos/7/rt/x86_64/
-gpgcheck=0
-EOF
-yum install -y rt-tests
-
 for cmd in tmux cyclictest; do
     command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed. Aborting"; exit 1; }
 done
