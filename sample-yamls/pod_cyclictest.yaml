@@ -15,22 +15,23 @@ spec:
     - name: tool
       value: "cyclictest"
     - name: DURATION
-      value: "2m"
+      value: "2s"
+    - name: DISABLE_CPU_BALANCE
+      value: "y"
+      # DISABLE_CPU_BALANCE requires privileged=true
     securityContext:
       capabilities:
-        add:
-          - SYS_NICE
-          - SYS_RAWIO
-          - IPC_LOCK
+      privileged: true
+      #capabilities:
+      #  add:
+      #    - SYS_NICE
+      #    - IPC_LOCK
+      #    - SYS_RAWIO
+
     volumeMounts:
-    - mountPath: /tmp
-      name: results-volume
     - mountPath: /dev/cpu_dma_latency
       name: cstate
   volumes:
-  - name: results-volume
-    hostPath:
-      path: /tmp
   - name: cstate
     hostPath:
       path: /dev/cpu_dma_latency
