@@ -37,8 +37,8 @@ if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 fi
 
 trap sigfunc TERM INT SIGUSR1
-sleep 3000000
 if ! command -v sysjitter >/dev/null 2>&1; then
+	cd sysjitter
 	git clone https://github.com/k-rister/sysjitter.git
 	cd sysjitter
 	git checkout luiz
@@ -64,7 +64,7 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 	prefix_cmd="taskset --cpu-list ${cyccore}"
 fi
  
-echo "cmd to run: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}"
+echo "cmd to run: sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}"
 #${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
 sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
 
