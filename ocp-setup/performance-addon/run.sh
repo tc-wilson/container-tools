@@ -30,7 +30,6 @@ echo "updating ${PERF_OPERATOR_DIR}/hack/deploy.sh"
 sed -i -r -e 's|^feature_dir=.*|feature_dir=cluster-setup/base/performance/|' ${PERF_OPERATOR_DIR}/hack/deploy.sh
 
 echo "updating ${PERF_OPERATOR_DIR}/cluster-setup/base/performance/performance_profile.yaml"
-envsubst < performance_profile.yaml
 if [ -f "performance_profile.yaml" ]; then
 	echo "overwite ${PERF_OPERATOR_DIR}/cluster-setup/base/performance/performance_profile.yaml"
 	envsubst < performance_profile.yaml > ${PERF_OPERATOR_DIR}/cluster-setup/base/performance/performance_profile.yaml
