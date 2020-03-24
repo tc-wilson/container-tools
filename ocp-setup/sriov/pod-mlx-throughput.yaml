@@ -8,8 +8,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: testpmd 
-    image: docker.io/cscojianzhan/testpmd
-    #imagePullPolicy: IfNotPresent
+    image: quay.io/jianzzha/perf-tools
     imagePullPolicy: Always
     env:
     - name: manual
@@ -17,15 +16,10 @@ spec:
     - name: ring_size
       value: "2048"
     securityContext:
-      capabilities:
       privileged: true
     volumeMounts:
     - mountPath: /dev/hugepages
       name: hugepage
-    - mountPath: /sys
-      name: sys
-    - mountPath: /dev
-      name: dev
     resources:
       limits:
         cpu: 4
@@ -36,12 +30,6 @@ spec:
         hugepages-1Gi: 2Gi
         memory: 2Gi
   volumes:
-  - name: sys
-    hostPath:
-      path: /sys
-  - name: dev
-    hostPath:
-      path: /dev
   - name: hugepage
     emptyDir:
       medium: HugePages
