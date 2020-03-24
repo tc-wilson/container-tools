@@ -5,6 +5,7 @@
 #	THRESHOLD_NS    (default 200)
 #	DISABLE_CPU_BALANCE (default "n", choices y/n)
 #	USE_TASKSET     (default "n", choice y/n)	
+#       manual  (default 'n', choice yn)
 
 source common-libs/functions.sh
 
@@ -65,6 +66,11 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 fi
  
 echo "cmd to run: sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}"
+
+if [ "${manual:-n}" == "y" ]; then
+sleep infinity
+fi
+
 #${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
 sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
 
