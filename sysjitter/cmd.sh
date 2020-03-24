@@ -39,18 +39,19 @@ fi
 trap sigfunc TERM INT SIGUSR1
 
 if ! command -v sysjitter >/dev/null 2>&1; then
-	[ -d /tmp/sysjitter ] && /usr/bin/rm -rf /tmp/sysjitter
-	mkdir -p /tmp/sysjitter
-	curl -L https://www.openonload.org/download/sysjitter/sysjitter-1.4.tgz | tar -C /tmp/sysjitter -xzf - 
-	make -C /tmp/sysjitter/sysjitter* && install -t /bin/ /tmp/sysjitter/sysjitter*/sysjitter 
+	git clone https://github.com/k-rister/sysjitter.git
+	cd sysjitter
+	git checkout luiz
+	make 
+	install -t /bin/ sysjitter
 fi
 
 for cmd in sysjitter; do
      command -v $cmd >/dev/null 2>&1 || { echo >&2 "$cmd required but not installed.  Aborting"; exit 1; }
 done
 
-cyccore=${cpus[0]}
-cindex=1
+cyccore=${cpus[1]}
+cindex=2
 ccount=1
 while (( $cindex < ${#cpus[@]} )); do
 	cyccore="${cyccore},${cpus[$cindex]}"
@@ -64,7 +65,8 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 fi
  
 echo "cmd to run: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}"
-${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
+#${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
+sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
