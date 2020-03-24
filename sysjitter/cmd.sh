@@ -9,7 +9,6 @@
 source common-libs/functions.sh
 
 function sigfunc() {
-	rm -rf {RESULT_DIR}/sysjitter_running
 	if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 		enable_balance
 	fi
@@ -23,14 +22,6 @@ echo "#####################################"
 echo "**** uid: $UID ****"
 RUNTIME_SECONDS=${RUNTIME_SECONDS:-10}
 THRESHOLD_NS=${THRESHOLD_NS:-200}
-
-if [[ -z "${RESULT_DIR}" ]]; then
-	RESULT_DIR="/tmp/sysjitter"
-fi
-
-# make sure the dir exists
-[ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
-
 
 cpulist=`get_allowed_cpuset`
 echo "allowed cpu list: ${cpulist}"
@@ -72,12 +63,8 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 	prefix_cmd="taskset --cpu-list ${cyccore}"
 fi
  
-touch ${RESULT_DIR}/sysjitter_running
-
 echo "cmd to run: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}"
-${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS} > ${RESULT_DIR}/sysjitter_${RUNTIME_SECONDS}.out
-
-rm -rf ${RESULT_DIR}/sysjitter_running
+${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
