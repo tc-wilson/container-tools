@@ -37,7 +37,7 @@ if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 fi
 
 trap sigfunc TERM INT SIGUSR1
-
+sleep 3000000
 if ! command -v sysjitter >/dev/null 2>&1; then
 	git clone https://github.com/k-rister/sysjitter.git
 	cd sysjitter
