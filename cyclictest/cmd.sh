@@ -10,7 +10,6 @@ source common-libs/functions.sh
 
 function sigfunc() {
         tmux kill-session -t stress 2>/dev/null
-	rm -rf {RESULT_DIR}/cyclictest_running
 	if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 		enable_balance
 	fi
@@ -24,10 +23,6 @@ echo "#####################################"
 echo "**** uid: $UID ****"
 if [[ -z "${DURATION}" ]]; then
 	DURATION="24h"
-fi
-
-if [[ -z "${RESULT_DIR}" ]]; then
-	RESULT_DIR="/tmp/cyclictest"
 fi
 
 if [[ -z "${stress_tool}" ]]; then
@@ -47,9 +42,6 @@ elif [[ "${rt_priority}" =~ ^[0-9]+$ ]]; then
 else
 	rt_priority=99
 fi
-
-# make sure the dir exists
-[ -d ${RESULT_DIR} ] || mkdir -p ${RESULT_DIR} 
 
 release=$(cat /etc/os-release | sed -n -r 's/VERSION_ID="(.).*/\1/p')
 
@@ -93,8 +85,6 @@ while (( $cindex < ${#cpus[@]} )); do
         ccount=$(($ccount + 1))
 done
 
-touch ${RESULT_DIR}/cyclictest_running
-
 extra_opt=""
 if [[ "$release" = "7" ]]; then
     extra_opt="${extra_opt} -n"
@@ -102,14 +92,13 @@ fi
 
 echo "running cmd: cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt}"
 if [ "${manual:-n}" == "n" ]; then
-    cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt} > ${RESULT_DIR}/cyclictest_${DURATION}.out
+    cyclictest -q -D ${DURATION} -p ${rt_priority} -t ${ccount} -a ${cyccore} -h 30 -m ${extra_opt}
 else
     sleep infinity
 fi
 
 # kill stress before exit 
 tmux kill-session -t stress 2>/dev/null
-rm -rf ${RESULT_DIR}/cyclictest_running
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
