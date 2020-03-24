@@ -20,8 +20,14 @@ spec:
       value: "y"
     - name: DISABLE_CPU_BALANCE
       value: "y"
+      # DISABLE_CPU_BALANCE requires privileged=true
     securityContext:
       privileged: true
+      #capabilities:
+      #  add:
+      #    - SYS_NICE
+      #    - IPC_LOCK
+      #    - SYS_RAWIO
     resources:
       limits:
         cpu: 4
