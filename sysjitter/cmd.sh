@@ -78,9 +78,10 @@ sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyc
 if [ -n "${ssh_address}" ]; then
 	echo "installing sshpass"
 	yum install -y sshpass
-	echo "upload result using ${ssh_user:-root}@${ssh_address}"
-	sshpass -p "{ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' || sleep infinity
-	sshpass -p "{ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
+	echo sshpass -p "${ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' 
+	sshpass -p "${ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results'
+	echo sshpass -p "${ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/
+	sshpass -p "${ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
 fi
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
