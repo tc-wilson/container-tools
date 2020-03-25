@@ -71,8 +71,17 @@ if [ "${manual:-n}" == "y" ]; then
 sleep infinity
 fi
 
+output_name="result-`date +%Y%m%dT%H%M%S`"
 #${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
-sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
+sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS} | tee ${output_name}
+
+if [ -n "${ssh_address}" ]; then
+	echo "installing sshpass"
+	yum install -y sshpass
+	echo "upload result using ${ssh_user:-root}@${ssh_address}"
+	sshpass -p "{ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' || sleep infinity
+	sshpass -p "{ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
+fi
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
