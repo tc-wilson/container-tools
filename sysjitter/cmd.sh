@@ -71,11 +71,12 @@ if [ "${manual:-n}" == "y" ]; then
 sleep infinity
 fi
 
-output_name="result-`date +%Y%m%dT%H%M%S`"
 #${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
-sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS} | tee ${output_name}
-
-if [ -n "${ssh_address}" ]; then
+if [ -z "${ssh_address}" ]; then
+	sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
+else
+	output_name="result-`date +%Y%m%dT%H%M%S`"
+	sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS} | tee ${output_name}
 	command -v sshpass >/dev/null 2>&1 || yum install -y sshpass
 	ssh_option="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 	echo sshpass -p "${ssh_password}" ssh ${ssh_option} ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' 
