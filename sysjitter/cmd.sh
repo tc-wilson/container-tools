@@ -76,12 +76,12 @@ output_name="result-`date +%Y%m%dT%H%M%S`"
 sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS} | tee ${output_name}
 
 if [ -n "${ssh_address}" ]; then
-	echo "installing sshpass"
-	yum install -y sshpass
-	echo sshpass -p "${ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' 
-	sshpass -p "${ssh_password}" ssh ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results'
-	echo sshpass -p "${ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/
-	sshpass -p "${ssh_password}" scp ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
+	command -v sshpass >/dev/null 2>&1 || yum install -y sshpass
+	ssh_option="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+	echo sshpass -p "${ssh_password}" ssh ${ssh_option} ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results' 
+	sshpass -p "${ssh_password}" ssh ${ssh_option} ${ssh_user:-root}@${ssh_address} 'mkdir -p sysjitter-results'
+	echo sshpass -p "${ssh_password}" scp ${ssh_option} ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/
+	sshpass -p "${ssh_password}" scp ${ssh_option} ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
 fi
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
