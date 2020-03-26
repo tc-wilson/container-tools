@@ -7,20 +7,23 @@ spec:
   containers:
   - name: container-perf-tools 
     image: quay.io/jianzzha/perf-tools
+    imagePullPolicy: IfNotPresent
     env:
     - name: GIT_URL
       value: https://github.com/jianzzha/container-tools.git
     - name: tool
       value: "sysjitter"
     - name: RUNTIME_SECONDS 
-      value: "5"
+      value: "3600"
     - name: THRESHOLD_NS
       value: "200"
     - name: USE_TASKSET
-      value: "y"
+      value: "n"
     - name: DISABLE_CPU_BALANCE
       value: "y"
       # DISABLE_CPU_BALANCE requires privileged=true
+    - name: manual
+      value: "n"
     securityContext:
       privileged: true
       #capabilities:
@@ -30,8 +33,11 @@ spec:
       #    - SYS_RAWIO
     resources:
       limits:
-        cpu: 4
-        memory: "400Mi"
+        cpu: 9
+        memory: "8000Mi"
       requests:
-        cpu: 4
-        memory: "400Mi"
+        cpu: 9
+        memory: "8000Mi"
+  nodeSelector:
+    node-role.kubernetes.io/worker-rt: ""
+
