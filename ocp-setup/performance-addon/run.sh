@@ -1,4 +1,8 @@
 #!/usr/bin/bash
+# env vars:
+#	FULL_REGISTRY_IMAGE
+#	WORKER_NODE
+
 pause(){
  echo $1
  read -n1 -rsp $'Press any key to continue or Ctrl+C to exit...\n'
