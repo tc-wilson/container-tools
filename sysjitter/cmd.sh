@@ -71,7 +71,12 @@ if [ "${manual:-n}" == "y" ]; then
 sleep infinity
 fi
 
-#${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
+# TODO: taskset -c ${cpus[0]} -p $$
+
+# old way without Karl's patch: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
+
+# TODO: lauch collection tool in background first
+
 if [ -z "${ssh_address}" ]; then
 	sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
 else
@@ -84,6 +89,8 @@ else
 	echo sshpass -p "${ssh_password}" scp ${ssh_option} ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/
 	sshpass -p "${ssh_password}" scp ${ssh_option} ${output_name} ${ssh_user:-root}@${ssh_address}:sysjitter-results/ || sleep infinity
 fi
+
+# TODO: kill the collection tool before exit
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
