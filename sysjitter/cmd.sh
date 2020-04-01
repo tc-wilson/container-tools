@@ -27,6 +27,9 @@ THRESHOLD_NS=${THRESHOLD_NS:-200}
 cpulist=`get_allowed_cpuset`
 echo "allowed cpu list: ${cpulist}"
 
+uname=`uname -nr`
+echo "$uname"
+
 # change list seperators from comma to new line and sort it 
 cpulist=`convert_number_range ${cpulist} | tr , '\n' | sort -n | uniq`
 
@@ -76,6 +79,11 @@ fi
 # old way without Karl's patch: ${prefix_cmd} sysjitter --cores ${cyccore} --runtime ${RUNTIME_SECONDS} ${THRESHOLD_NS}
 
 # TODO: lauch collection tool in background first
+
+if [ "${WAIT_FOR_USER:-n}" == "y" ]; then
+	echo "sleeping, waiting for the user to kill the sleep before proceeding"
+	sleep infinity
+fi
 
 if [ -z "${ssh_address}" ]; then
 	sysjitter --runtime ${RUNTIME_SECONDS} --rtprio 95 --accept-cpuset --cores ${cyccore} --master-core ${cpus[0]} ${THRESHOLD_NS}
