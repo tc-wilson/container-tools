@@ -71,7 +71,7 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 	prefix_cmd="taskset --cpu-list ${cyccore}"
 fi
  
-echo "cmd to run: oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --core-main-thread ${cpus[0]}"
+echo "cmd to run: oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --cpu-main-thread ${cpus[0]}"
 
 if [ "${manual:-n}" == "y" ]; then
 sleep infinity
@@ -83,7 +83,7 @@ if [ "${WAIT_FOR_USER:-n}" == "y" ]; then
 	sleep infinity
 fi
 
-oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --core-main-thread ${cpus[0]}
+oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --cpu-main-thread ${cpus[0]}
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
