@@ -19,9 +19,14 @@ echo "############# dumping env ###########"
 env
 echo "#####################################"
 
+echo " "
+echo "########## container info ###########"
+echo "/proc/cmdline:"
+cat /proc/cmdline
+echo "#####################################"
+
 echo "**** uid: $UID ****"
 RUNTIME_SECONDS=${RUNTIME_SECONDS:-10}
-THRESHOLD_NS=${THRESHOLD_NS:-200}
 
 cpulist=`get_allowed_cpuset`
 echo "allowed cpu list: ${cpulist}"
@@ -66,7 +71,7 @@ if [ "${USE_TASKSET:-n}" == "y" ]; then
 	prefix_cmd="taskset --cpu-list ${cyccore}"
 fi
  
-echo "cmd to run: oslat --runtime ${RUNTIME_SECONDS} --rtprio 1 --cpu-list ${cyccore}"
+echo "cmd to run: oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --core-main-thread ${cpus[0]}"
 
 if [ "${manual:-n}" == "y" ]; then
 sleep infinity
@@ -78,7 +83,7 @@ if [ "${WAIT_FOR_USER:-n}" == "y" ]; then
 	sleep infinity
 fi
 
-oslat --runtime ${RUNTIME_SECONDS} --rtprio 1 --cpu-list ${cyccore}
+oslat --runtime ${RUNTIME_SECONDS} --rtprio ${RTPRIO} --cpu-list ${cyccore} --core-main-thread ${cpus[0]}
 
 if [ "${DISABLE_CPU_BALANCE:-n}" == "y" ]; then
 	enable_balance
