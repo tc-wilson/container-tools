@@ -66,7 +66,7 @@ while (( $cindex < ${#cpus[@]} )); do
         ccount=$(($ccount + 1))
 done
 
-sibling=`cat /sys/devices/system/cpu/cpu4/topology/thread_siblings_list | awk -F '[-,]' '{print $2}'`
+sibling=`cat /sys/devices/system/cpu/cpu${cpus[0]}/topology/thread_siblings_list | awk -F '[-,]' '{print $2}'`
 if [[ "${sibling}" =~ ^[0-9]+$ ]]; then
         echo "removing cpu${sibling} from the cpu list because it is a sibling of cpu${cpus[0]} which will be the cpu-main-thread"
         cyccore=${cyccore//,$sibling/}
